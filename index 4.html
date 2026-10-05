@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="az">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>ÜMİD.AS — Uşaq işi idarəetmə sistemi</title>
+<style>
+:root{--bg:#f3f5f8;--card:#fff;--ink:#14213d;--mut:#5b667d;--line:#d9dee8;--pri:#1d3b6b;--acc:#e8a317;--ok:#2a7f62;--bad:#b3261e}
+@media(prefers-color-scheme:dark){:root{--bg:#0e1626;--card:#16213a;--ink:#e8edf7;--mut:#9aa7c0;--line:#2a3857;--pri:#6f9be0;--acc:#f0b84a;--ok:#5cc3a0;--bad:#ff8a80}}
+*{box-sizing:border-box}html,body{margin:0}
+body{background:var(--bg);color:var(--ink);font:15px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;min-height:100vh}
+h1,h2,h3{margin:0;line-height:1.25}
+button{font:inherit;cursor:pointer;border-radius:8px;border:1px solid var(--line);background:var(--card);color:var(--ink);padding:8px 14px}
+button.p{background:var(--pri);border-color:var(--pri);color:#fff}
+@media(prefers-color-scheme:dark){button.p{color:#0e1626}}
+button.d{color:var(--bad)}button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible{outline:3px solid var(--acc);outline-offset:1px}
+input,select,textarea{width:100%;font:inherit;padding:8px 10px;border:1px solid var(--line);border-radius:8px;background:var(--card);color:var(--ink)}
+textarea{min-height:70px;resize:vertical}
+label{display:block;font-size:13px;color:var(--mut);margin-bottom:3px}
+.login{max-width:400px;margin:8vh auto;padding:28px;background:var(--card);border:1px solid var(--line);border-radius:14px}
+.logo{font-size:30px;font-weight:800;letter-spacing:.5px;color:var(--pri)}.logo b{color:var(--acc)}
+.sub{color:var(--mut);margin:4px 0 18px}
+.login div.f{margin-bottom:12px}
+.tabs2{display:flex;gap:6px;margin-bottom:16px}.tabs2 button{flex:1}.tabs2 .on{background:var(--pri);color:#fff;border-color:var(--pri)}
+.err{color:var(--bad);min-height:20px;font-size:13px}
+header{display:flex;align-items:center;gap:12px;padding:10px 18px;background:var(--card);border-bottom:3px solid var(--acc);flex-wrap:wrap}
+header .sp{flex:1}header small{color:var(--mut)}
+.wrap{display:grid;grid-template-columns:290px 1fr;gap:16px;padding:16px;max-width:1300px;margin:auto}
+@media(max-width:800px){.wrap{grid-template-columns:1fr}}
+.side,.main{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px}
+.kid{padding:9px 10px;border-radius:8px;cursor:pointer;border:1px solid transparent}
+.kid:hover{background:var(--bg)}.kid.on{border-color:var(--pri);background:var(--bg)}.kid small{color:var(--mut);display:block}
+.tabs{display:flex;gap:4px;flex-wrap:wrap;margin:14px 0;border-bottom:1px solid var(--line);padding-bottom:10px}
+.tabs button{border-radius:20px;font-size:13px;padding:6px 12px}.tabs .on{background:var(--pri);color:#fff;border-color:var(--pri)}
+.tabs i{display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--ok);margin-left:6px}
+fieldset{border:1px solid var(--line);border-radius:10px;margin:0 0 16px;padding:14px}
+legend{font-weight:700;color:var(--pri);padding:0 8px}
+.g{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:12px}.g .w{grid-column:1/-1}
+.ent{border:1px dashed var(--line);border-radius:10px;padding:12px;margin-bottom:10px}
+.ent header{all:unset;display:flex;justify-content:space-between;margin-bottom:8px;color:var(--mut);font-size:13px}
+.note{background:var(--bg);border-left:4px solid var(--acc);padding:8px 12px;border-radius:6px;color:var(--mut);font-size:13px;margin:0 0 12px}
+.empty{color:var(--mut);padding:30px;text-align:center}
+.saved{color:var(--ok);font-size:13px}
+@media print{header,.side,.tabs,button{display:none!important}.wrap{display:block}}
+</style>
+</head>
+<body>
+<div id="app"></div>
+<script>
+/* ===== Struktur (bölmələr və sahələr) ===== */
+const T='t',D='d',N='n',S='s';
+const QURUM=['Rayon/şəhər İcra Hakimiyyəti yanında Yetkinlik yaşına çatmayanların işləri və hüquqlarının müdafiəsi üzrə komissiya','Qəyyumluq və himayəçilik orqanı','Məhkəmə','Digər qurum'];
+const MES=['Sosial işçi','Psixoloq','Pedaqoq','Həkim','Digər'];
+const SECS=[
+{id:'reg',t:'1. Qeydiyyat',g:[
+ {h:'Şəxsi və identifikasiya məlumatları',f:[['ad','Adı',T],['soyad','Soyadı',T],['ata','Ata adı',T],['dt','Doğum tarixi',D],['cins','Cinsi',S,['Qız','Oğlan']],['fin','FİN kodu',T],['sv','Şəxsiyyət vəsiqəsinin seriya və nömrəsi',T]]},
+ {h:'Hüquqi statusu təsdiq edən sənədlər',f:[['sened','Sənəd növü',S,['Qəyyumluq/himayəçilik orqanının qərarı','Məhkəmə qətnaməsi','Valideynlərin ölüm haqqında şəhadətnaməsi','Valideynlik hüquqlarından məhrum edilmə haqqında sənəd']],['sno','Sənədin nömrəsi',T],['star','Sənədin tarixi',D],['sq','Qeyd',N]]},
+ {h:'Qəbul tarixi və əsası',f:[['qtar','Müəssisəyə daxilolma tarixi',D],['gond','Göndərən qurum',S,QURUM],['qes','Qəbul əsası',N]]},
+ {h:'Fövqəladə hal üçün əlaqə',list:'ela',add:'Əlaqə əlavə et',f:[['ad','Ad, soyad',T],['qoh','Qəyyum / qohum / məsul şəxs',S,['Qəyyum','Qohum','Məsul şəxs']],['tel','Telefon',T],['q','Qeyd',T]]}]},
+{id:'ilk',t:'2. İlkin qiymətləndirmə',g:[
+ {h:'Sosial və ailə tarixçəsi',f:[['vsos','Valideynlərin sosial vəziyyəti',N],['vmes','Valideynlərin məşğulluğu və ya olmama səbəbləri',N],['qard','Bioloji ailədəki digər uşaqlar (bacı/qardaş) və olduqları yer',N],['bir','Birlikdə yerləşdirilmə statusu',S,['Birlikdə yerləşdirilib','Ayrı yerləşdirilib','Bacı/qardaş yoxdur','Naməlum']]]},
+ {h:'Keçmiş yaşayış və təhsil şəraiti',f:[['yer','Müəssisəyə qədərki yaşayış yeri',T],['mekt','Təhsil aldığı məktəb / bağça',T]]},
+ {h:'Məruz qaldığı risklər və travmalar',note:'Məxfi bölmə: yalnız səlahiyyətli mütəxəssislər üçün.',f:[['ih','İhmal',S,['Yoxdur','Şübhə var','Təsdiqlənib']],['zor','Zorakılıq',S,['Yoxdur','Şübhə var','Təsdiqlənib']],['kuc','Küçə həyatı',S,['Yoxdur','Var']],['ptr','Psixoloji travma göstəriciləri',N],['rq','Digər risklər və qeydlər',N]]}]},
+{id:'kom',t:'3. Kompleks qiymətləndirmə',g:[
+ {h:'Sosial qiymətləndirmə',f:[['sb','Sosial bacarıqlar',N],['un','Ünsiyyət qabiliyyəti',N],['dav','Davranış',N]]},
+ {h:'Sağlamlıq və fiziki inkişaf',f:[['tib','Tibbi müayinə nəticələri',N],['xr','Xroniki xəstəliklər',N],['el','Əlillik dərəcəsi',S,['Yoxdur','I qrup','II qrup','III qrup','Əlilliyi olan uşaq']],['pey','Peyvənd kartı (qeydlər)',N]]},
+ {h:'Psixoloji qiymətləndirmə',f:[['emo','Emosional vəziyyət',N],['phes','Psixoloji qiymətləndirmə hesabatı',N],['ptov','Tövsiyələr',N]]},
+ {h:'Təhsil / bacarıq qiymətləndirməsi',f:[['sav','Savadlılıq dərəcəsi',T],['mar','Xüsusi maraqlar',N],['ist','İstedadlar',N]]}]},
+{id:'frip',t:'4. Fərdi inkişaf planı (FRİP)',g:[
+ {h:'Məqsəd və hədəflər',f:[['qm','Qısamüddətli hədəflər (1–3 ay)',N],['um','Uzunmüddətli hədəflər (6–12 ay)',N]]},
+ {h:'Tədbirlər planı və məsullar',list:'ted',add:'Tədbir əlavə et',f:[['n','Tədbir növü',S,['Psixoloji dəstək seansı','Sosial adaptasiya / həyati bacarıq təlimi','Təhsil və dərs dəstəyi','Asudə vaxt, dərnək, idman']],['t','Təsvir / cədvəl',T],['tar','Başlama tarixi',D],['mv','Məsul mütəxəssis',S,MES],['ma','Məsul şəxsin adı',T],['st','Status',S,['Planlaşdırılıb','İcra olunur','Tamamlanıb','Dayandırılıb']]]}]},
+{id:'mon',t:'5. Monitorinq və dinamika',g:[
+ {h:'Sosial işçinin gündəlik / həftəlik qeydləri',list:'qey',add:'Qeyd əlavə et',f:[['tar','Tarix',D],['n','Qeyd növü',S,['Gündəlik','Həftəlik']],['m','Müəllif',T],['q','Davranış, emosional vəziyyət və ünsiyyətdə dəyişikliklər',N]]},
+ {h:'Dövri qiymətləndirmə (monitorinq hesabatı)',list:'dov',add:'Hesabat əlavə et',f:[['tar','Tarix',D],['p','Dövr',S,['1 ay','3 ay','6 ay']],['f','FRİP icra faizi',T],['t','İcranın təhlili',N],['d','Plana edilən düzəlişlər',N]]},
+ {h:'Hadisə və insident qeydiyyatı',list:'ins',add:'İnsident əlavə et',f:[['tar','Tarix',D],['n','Növ',S,['Müəssisədaxili münaqişə','Xüsusi davranış halı','Sağlamlıq hadisəsi','Digər']],['t','Təsvir',N],['tb','Görülən tədbirlər',N]]}]},
+{id:'alt',t:'6. Alternativ qayğı',g:[
+ {h:'Bioloji ailə ilə görüşlərin monitorinqi',list:'gor',add:'Görüş əlavə et',f:[['tar','Tarix',D],['k','Görüşən şəxs',T],['q','Qiymətləndirmə',N]]},
+ {h:'Ailə tipli qayğı',f:[['ast','Proses statusu',S,['Proses başlamayıb','Bioloji ailəyə qayıdış','Övladlığa vermə','Qəyyumluq','Himayədar ailə (Foster care)']],['aq','Prosesin gedişi və qeydlər',N]]},
+ {h:'18 yaşa çatma və müstəqil həyata hazırlıq',f:[['pes','Peşə yönümlülüyü və peşə təhsili qeydləri',N],['men','Mənzil və yaşayış yeri ilə təminat statusu',S,['Təmin olunub','Növbədədir','Təmin olunmayıb']],['menq','Mənzil üzrə qeyd',T],['mes','Məşğulluq və işə düzəlmə dəstəyi',N]]},
+ {h:'Çıxış statusu və yekun rəy',f:[['ctar','Müəssisədən ayrılma tarixi',D],['cs','Çıxış səbəbi',S,['Ailəyə qayıdış','Başqa müəssisəyə keçid','Müstəqil həyat','Övladlığa vermə','Qəyyumluq / himayə','Digər']],['yek','Son qiymətləndirmə hesabatı və yekun rəy',N]]}]}
+];
+
+/* ===== Kriptoqrafiya: PBKDF2 → (giriş hash-i + AES-GCM açarı) ===== */
+const E=new TextEncoder(),$=s=>document.querySelector(s);
+const b2s=b=>btoa(String.fromCharCode(...new Uint8Array(b))),s2b=s=>Uint8Array.from(atob(s),c=>c.charCodeAt(0));
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+async function derive(pw,salt){
+  const k=await crypto.subtle.importKey('raw',E.encode(pw),'PBKDF2',false,['deriveBits']);
+  const b=new Uint8Array(await crypto.subtle.deriveBits({name:'PBKDF2',salt,iterations:250000,hash:'SHA-256'},k,512));
+  return{auth:b2s(b.slice(0,32)),key:await crypto.subtle.importKey('raw',b.slice(32),'AES-GCM',false,['encrypt','decrypt'])};
+}
+const users=()=>JSON.parse(localStorage.getItem('umid_users')||'{}');
+let U=null,KEY=null,DB={kids:[]},cur=null,tab='reg',idle=null,mode='in';
+async function persist(){
+  const iv=crypto.getRandomValues(new Uint8Array(12));
+  const ct=await crypto.subtle.encrypt({name:'AES-GCM',iv},KEY,E.encode(JSON.stringify(DB)));
+  localStorage.setItem('umid_d_'+U,JSON.stringify({iv:b2s(iv),ct:b2s(ct)}));
+}
+async function loadDB(){
+  const r=localStorage.getItem('umid_d_'+U);if(!r)return{kids:[]};
+  const o=JSON.parse(r);
+  return JSON.parse(new TextDecoder().decode(await crypto.subtle.decrypt({name:'AES-GCM',iv:s2b(o.iv)},KEY,s2b(o.ct))));
+}
+
+/* ===== Giriş / qeydiyyat ===== */
+function loginView(msg=''){
+  clearTimeout(idle);
+  $('#app').innerHTML=`<div class="login">
+  <div class="logo">ÜMİD<b>.AS</b></div>
+  <p class="sub">Himayəyə ehtiyacı olan uşaqların fərdi işinin idarə edilməsi sistemi</p>
+  <div class="tabs2"><button class="${mode=='in'?'on':''}" data-m="in">Daxil ol</button><button class="${mode=='up'?'on':''}" data-m="up">Hesab yarat</button></div>
+  <div class="f"><label>İstifadəçi adı</label><input id="u" autocomplete="username"></div>
+  ${mode=='up'?`<div class="f"><label>Ad, soyad</label><input id="nm"></div><div class="f"><label>Vəzifə</label><select id="rl">${MES.map(x=>`<option>${x}</option>`).join('')}</select></div>`:''}
+  <div class="f"><label>Parol (ən azı 8 simvol)</label><input id="pw" type="password" autocomplete="${mode=='in'?'current-password':'new-password'}"></div>
+  <div class="err" id="er">${msg}</div>
+  <button class="p" id="go" style="width:100%">${mode=='in'?'Daxil ol':'Hesab yarat'}</button>
+  <p class="note" style="margin-top:16px">Hər istifadəçinin məlumatı yalnız onun parolu ilə şifrələnir. Parol unudularsa, məlumat bərpa edilə bilməz.</p></div>`;
+  document.querySelectorAll('[data-m]').forEach(b=>b.onclick=()=>{mode=b.dataset.m;loginView()});
+  $('#go').onclick=auth;$('#pw').onkeydown=e=>e.key=='Enter'&&auth();
+}
+async function auth(){
+  const u=$('#u').value.trim().toLowerCase(),pw=$('#pw').value,er=m=>$('#er').textContent=m;
+  if(!u||pw.length<8)return er('İstifadəçi adı və ən azı 8 simvollu parol daxil edin.');
+  const all=users();
+  try{
+    if(mode=='up'){
+      if(all[u])return er('Bu istifadəçi adı artıq mövcuddur.');
+      const nm=$('#nm').value.trim();if(!nm)return er('Ad və soyadı daxil edin.');
+      const salt=crypto.getRandomValues(new Uint8Array(16)),d=await derive(pw,salt);
+      all[u]={salt:b2s(salt),auth:d.auth,nm,rl:$('#rl').value};
+      localStorage.setItem('umid_users',JSON.stringify(all));
+      U=u;KEY=d.key;DB={kids:[]};await persist();
+    }else{
+      const r=all[u];if(!r)return er('İstifadəçi adı və ya parol yanlışdır.');
+      const d=await derive(pw,s2b(r.salt));
+      if(d.auth!==r.auth)return er('İstifadəçi adı və ya parol yanlışdır.');
+      U=u;KEY=d.key;DB=await loadDB();
+    }
+    cur=null;appView();
+  }catch(e){er('Xəta baş verdi. Səhifə HTTPS və ya localhost üzərindən açılmalıdır.')}
+}
+function logout(){U=KEY=null;DB={kids:[]};cur=null;mode='in';loginView()}
+function touch(){clearTimeout(idle);if(U)idle=setTimeout(()=>{logout();loginView('Qeyri-aktivliyə görə sessiya bağlandı.')},600000)}
+['click','keydown','input'].forEach(e=>document.addEventListener(e,touch));
+
+/* ===== Əsas görünüş ===== */
+function appView(){
+  const me=users()[U];touch();
+  $('#app').innerHTML=`<header><div class="logo" style="font-size:22px">ÜMİD<b>.AS</b></div><div class="sp"></div>
+   <small>${esc(me.nm)} · ${esc(me.rl)}</small><span class="saved" id="sv"></span>
+   <button id="exp">Ehtiyat nüsxə</button><button id="imp">Bərpa et</button><button id="lo">Çıxış</button></header>
+  <div class="wrap"><aside class="side"><button class="p" id="nk" style="width:100%;margin-bottom:10px">Yeni uşaq qeydiyyatı</button>
+  <input id="q" placeholder="Axtar: ad, soyad, FİN" style="margin-bottom:8px"><div id="kl"></div></aside><main class="main" id="mn"></main></div>`;
+  $('#lo').onclick=logout;
+  $('#nk').onclick=async()=>{const k={id:crypto.randomUUID(),d:{},l:{},at:Date.now()};DB.kids.unshift(k);cur=k.id;tab='reg';await persist();list();show()};
+  $('#q').oninput=list;
+  $('#exp').onclick=()=>{const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([localStorage.getItem('umid_d_'+U)||'{}'],{type:'application/json'}));a.download='umid-'+U+'-ehtiyat.json';a.click()};
+  $('#imp').onclick=()=>{const i=document.createElement('input');i.type='file';i.accept='.json';i.onchange=async()=>{try{localStorage.setItem('umid_d_'+U,await i.files[0].text());DB=await loadDB();cur=null;list();show();flash('Bərpa olundu')}catch{alert('Fayl bu hesaba aid deyil və ya zədəlidir.')}};i.click()};
+  list();show();
+}
+const kname=k=>[k.d.soyad,k.d.ad,k.d.ata].filter(Boolean).join(' ')||'Adsız qeyd';
+function list(){
+  const q=($('#q')?.value||'').toLowerCase();
+  const ks=DB.kids.filter(k=>!q||(kname(k)+' '+(k.d.fin||'')).toLowerCase().includes(q));
+  $('#kl').innerHTML=ks.length?ks.map(k=>`<div class="kid ${k.id==cur?'on':''}" data-id="${k.id}" tabindex="0">${esc(kname(k))}<small>${esc(k.d.dt||'doğum tarixi yoxdur')}${k.d.cs?' · çıxıb':''}</small></div>`).join(''):'<div class="empty">Qeyd tapılmadı</div>';
+  document.querySelectorAll('.kid').forEach(e=>{e.onclick=()=>{cur=e.dataset.id;tab='reg';list();show()};e.onkeydown=ev=>ev.key=='Enter'&&e.click()});
+}
+const flash=m=>{const s=$('#sv');if(s){s.textContent=m||'Yadda saxlanıldı';clearTimeout(flash.t);flash.t=setTimeout(()=>s.textContent='',1800)}};
+let tm;const save=()=>{clearTimeout(tm);tm=setTimeout(async()=>{await persist();flash()},400)};
+const has=(k,s)=>s.g.some(g=>g.list?(k.l[g.list]||[]).length:g.f.some(f=>k.d[f[0]]));
+function fld(f,v,at){
+  const[k,l,t,o]=f,w=t==N?' w':'';let c;
+  if(t==S)c=`<select ${at}><option value="">—</option>${o.map(x=>`<option${x==v?' selected':''}>${esc(x)}</option>`).join('')}</select>`;
+  else if(t==N)c=`<textarea ${at}>${esc(v)}</textarea>`;
+  else c=`<input type="${t==D?'date':'text'}" value="${esc(v)}" ${at}>`;
+  return`<div class="${w.trim()}"><label>${esc(l)}</label>${c}</div>`;
+}
+function show(){
+  const k=DB.kids.find(x=>x.id==cur),m=$('#mn');
+  if(!k){m.innerHTML='<div class="empty"><h2>Uşaq seçin və ya yeni qeydiyyat yaradın</h2><p>Bütün məlumat yalnız sizin hesabınızda, şifrələnmiş şəkildə saxlanılır.</p></div>';return}
+  const s=SECS.find(x=>x.id==tab);
+  m.innerHTML=`<div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap"><h2 style="flex:1">${esc(kname(k))}</h2><button onclick="print()">Çap et</button><button class="d" id="dk">Qeydi sil</button></div>
+  <div class="tabs">${SECS.map(x=>`<button class="${x.id==tab?'on':''}" data-t="${x.id}">${x.t}${has(k,x)?'<i></i>':''}</button>`).join('')}</div>
+  ${s.g.map(g=>`<fieldset><legend>${g.h}</legend>${g.note?`<p class="note">${g.note}</p>`:''}${g.list?
+   (k.l[g.list]||[]).map((e,i)=>`<div class="ent"><header><span>№ ${i+1}</span><button class="d" data-rm="${g.list}:${i}">Sil</button></header><div class="g">${g.f.map(f=>fld(f,e[f[0]],`data-l="${g.list}" data-i="${i}" data-k="${f[0]}"`)).join('')}</div></div>`).join('')+`<button data-add="${g.list}">+ ${g.add}</button>`
+   :`<div class="g">${g.f.map(f=>fld(f,k.d[f[0]],`data-k="${f[0]}"`)).join('')}</div>`}</fieldset>`).join('')}`;
+  m.querySelectorAll('[data-t]').forEach(b=>b.onclick=()=>{tab=b.dataset.t;show()});
+  m.querySelectorAll('[data-k]').forEach(i=>i.oninput=i.onchange=()=>{
+    if(i.dataset.l){(k.l[i.dataset.l][+i.dataset.i])[i.dataset.k]=i.value}else{k.d[i.dataset.k]=i.value;if(/^(ad|soyad|ata|fin|dt|cs)$/.test(i.dataset.k))list()}save()});
+  m.querySelectorAll('[data-add]').forEach(b=>b.onclick=async()=>{(k.l[b.dataset.add]=k.l[b.dataset.add]||[]).push({});await persist();show()});
+  m.querySelectorAll('[data-rm]').forEach(b=>b.onclick=async()=>{const[a,i]=b.dataset.rm.split(':');if(confirm('Bu qeyd silinsin?')){k.l[a].splice(+i,1);await persist();show()}});
+  $('#dk').onclick=async()=>{if(confirm('Uşağın bütün qeydləri həmişəlik silinsin?')){DB.kids=DB.kids.filter(x=>x.id!=cur);cur=null;await persist();list();show()}};
+}
+loginView();
+</script>
+</body>
+</html>
